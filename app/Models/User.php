@@ -20,7 +20,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',        // ✅ Add role to allow saving user role
-        'class_name',  // ✅ Add class_name for students
+        'class_name',
+        'class_assigned'  // ✅ Add class_name for students
     ];
 
     /**

@@ -32,9 +32,9 @@ class TeacherController extends Controller
             ];
         });
 
-        $className = $request->input('class_name');
+        $className = $request->input('class_name'); // 
 
-        $marks = Mark::with('user')
+        $marks = Mark::with('user') // 
                     ->where('class_name', $className)
                     ->get();
 
