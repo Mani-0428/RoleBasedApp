@@ -50,6 +50,12 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/marks', [MarkController::class, 'index'])->name('marks.index');
+    Route::post('/marks', [MarkController::class, 'store'])->name('marks.store');
+});
+
+
 use Illuminate\Support\Facades\Log;
 
 Route::get('/log-sql', function () {

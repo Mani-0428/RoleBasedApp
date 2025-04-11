@@ -12,14 +12,11 @@ class MarkController extends Controller
 {
     public function create()
     {
-        $user = Auth::user();
+        $students = Auth::user()->isTeacher()
+            ? User::where('role', 'student')->select('id', 'name', 'class_name')->get()
+            : collect();
 
-        if ($user->role === 'teacher') {
-            $students = User::where('role', 'student')->get();
-            return view('marks.create', compact('students'));
-        }
-
-        return view('marks.create');
+        return view('marks.index', compact('students'));
     }
 
     public function store(Request $request)
@@ -27,23 +24,24 @@ class MarkController extends Controller
         $user = Auth::user();
 
         $rules = [
-            'subject' => 'required|string',
-            'score' => 'required|integer|min:0|max:100',
+            'subject' => 'required|string|max:255',
+            'score'   => 'required|integer|min:0|max:100',
         ];
 
-        if ($user->role === 'teacher') {
+        if ($user->isTeacher()) {
             $rules['user_id'] = 'required|exists:users,id';
         }
 
         $validated = $request->validate($rules);
 
-        if ($user->role === 'teacher') {
-            $student = User::find($validated['user_id']);
-            $validated['class_name'] = $student->class_name ?? 'Unknown';
+        if ($user->isTeacher()) {
+            $student = User::findOrFail($validated['user_id']);
         } else {
+            $student = $user;
             $validated['user_id'] = $user->id;
-            $validated['class_name'] = $user->class_name ?? 'Unknown';
         }
+
+        $validated['class_name'] = $student->class_name ?? 'Unknown';
 
         Mark::create($validated);
 
@@ -54,26 +52,13 @@ class MarkController extends Controller
     {
         $user = Auth::user();
 
-        // Log SQL queries
-        DB::listen(function ($query) {
-            logger('SQL: ' . $query->sql);
-            logger('Bindings: ' . json_encode($query->bindings));
-            logger('Time: ' . $query->time . 'ms');
-        });
-
-        if ($user->role === 'teacher') {
-            $marks = Mark::with('user')->get();
-
-            $groupedMarks = $marks->groupBy(function ($mark) {
-                return $mark->class_name ?? 'Unknown';
-            });
-
-            return view('marks.index', compact('groupedMarks'))->with('query_log', true);
+        if ($user->isTeacher()) {
+            $students = User::where('role', 'student')->get();
+            $groupedMarks = Mark::with('user')->get()->groupBy(fn($mark) => $mark->class_name ?? 'Unknown');
+            return view('marks.index', compact('groupedMarks', 'students'));
         }
 
-        // Student view
         $marks = Mark::where('user_id', $user->id)->latest()->get();
-
-        return view('marks.index', compact('marks'))->with('query_log', true);
+        return view('marks.index', compact('marks'));
     }
 }
