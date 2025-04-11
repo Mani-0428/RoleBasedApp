@@ -43,6 +43,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/teacher/select-class', [TeacherController::class, 'selectClass'])->name('teacher.select-class');
     Route::post('/teacher/view-marks', [TeacherController::class, 'viewMarks'])->name('teacher.view-marks');
 });
+Route::middleware(['auth'])->group(function () {
+    Route::get('/teacher/select-class', [TeacherController::class, 'selectClass'])->name('teacher.select-class');
+    Route::post('/teacher/view-marks', [TeacherController::class, 'viewMarks'])->name('teacher.view-marks');
+    Route::post('/teacher/export-marks', [TeacherController::class, 'exportMarks'])->name('teacher.export-marks');
+});
+
 
 use Illuminate\Support\Facades\Log;
 

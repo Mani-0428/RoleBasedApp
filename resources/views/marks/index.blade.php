@@ -4,7 +4,7 @@
 <div class="container mx-auto px-4">
     <h1 class="text-2xl font-bold mb-4">Marks Dashboard</h1>
 
-    @if(Auth::user()->role === 'teacher')
+    @if(Auth::user()->role === 'teacher') 
         @if(isset($groupedMarks) && $groupedMarks->count())
             @foreach($groupedMarks as $class => $marks)
                 <h2 class="text-xl font-bold mt-6 mb-2">Class: {{ $class }}</h2>
